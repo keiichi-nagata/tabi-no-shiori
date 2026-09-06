@@ -20,7 +20,7 @@
 | ④ 完成しおり | `/itinerary/?id=…` | 表紙・日別タイムライン・持ち物メモ・共有セクション（URL＋PIN）。旅程では各項目に「メモ（旅行中の記録）」を追記可。「しおりを編集する」で ③ を再オープン |
 | 共有・閲覧 | `/share/?id=…` | まず PIN 入力 → サーバー側で照合してからデータ返却。PIN を知る人は各項目の「メモ」を編集可 |
 | 履歴 | `/history` | ログイン中ユーザーが作成したしおり一覧 |
-| ログイン | `/login` | メールリンク（マジックリンク）認証。履歴保存のためだけに使用 |
+| ログイン | `/login` | メールに届く6桁コードを入力（リンク方式でないので iOS ホーム画面追加でも可）。履歴保存のためだけに使用 |
 
 ---
 
@@ -31,7 +31,7 @@
 3. **Anthropic**：`supabase secrets set ANTHROPIC_API_KEY=sk-ant-...`（任意で `ANTHROPIC_MODEL`）。
 4. **Edge Functions デプロイ**：`supabase link` 後に `bash scripts/deploy-functions.sh`（7 関数）。
 5. **GitHub Secrets**（Settings → Secrets and variables → Actions）：`NEXT_PUBLIC_SUPABASE_URL` と `NEXT_PUBLIC_SUPABASE_ANON_KEY`。
-6. **Supabase Auth**：Authentication → URL Configuration の Redirect URLs に `https://<you>.github.io/<repo>/auth/callback/`、Site URL に `https://<you>.github.io/<repo>/`。
+6. **Supabase Auth**：Email Templates の "Magic Link" に `{{ .Token }}` を入れる（6桁コード表示用）。URL Configuration の Site URL と Redirect URLs（`.../auth/callback/`）も設定。詳細は 3-3。
 7. `main` に push すると Actions がビルドして公開。数分後 `https://<you>.github.io/<repo>/` で確認。
 
 > 独自ドメイン／ユーザーページ（`<you>.github.io`）の場合は `.github/workflows/deploy.yml` の `NEXT_PUBLIC_BASE_PATH` を空にする。
@@ -98,16 +98,21 @@ bash scripts/deploy-functions.sh <ref>
 > 認証は関数内で行うため全関数 `--no-verify-jwt`（`create-itinerary` / `reset-pin` は関数内で JWT 検証、
 > `get-shared` / `update-shared` は PIN 照合）。
 
-#### 3-3. Auth のリダイレクト URL を許可
+#### 3-3. Auth 設定（メール6桁コードでログイン）
 
-Supabase → **Authentication → URL Configuration** で、以下を **Redirect URLs** に追加：
+ログインは**メールに届く6桁コード**方式（リンクではないので iOS のホーム画面追加でも動く）。
 
-```
-https://<you>.github.io/<repo>/auth/callback/
-http://localhost:3000/auth/callback/     # ローカル確認用
-```
-
-`Site URL` も `https://<you>.github.io/<repo>/` にしておくと確実です。
+1. **Authentication → Email Templates → "Magic Link"** の本文に `{{ .Token }}` を含める（下記）。
+   ```html
+   <h2>ログインコード</h2>
+   <p>アプリに次の6桁のコードを入力してください：</p>
+   <p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
+   <p>（リンクからでも可）<a href="{{ .ConfirmationURL }}">ログイン</a></p>
+   ```
+2. **Authentication → URL Configuration**（リンクを押した場合のフォールバック用）：
+   - Site URL: `https://<you>.github.io/<repo>/`
+   - Redirect URLs に追加: `https://<you>.github.io/<repo>/auth/callback/` と `http://localhost:3000/auth/callback/`
+3. 無料枠の送信メールは 1 時間あたり数通の制限あり。多用するなら Authentication → SMTP で独自 SMTP を設定。
 
 #### 3-4. ローカルで Supabase モードを使う場合
 

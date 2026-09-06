@@ -569,18 +569,30 @@ export async function updateSharedItinerary(
 }
 
 // ─────────────────────────────────────────────────────────────
-// 認証（メールリンク）
+// 認証（メールの 6 桁コード。リンクではないので iOS のホーム画面追加でも動く）
 // ─────────────────────────────────────────────────────────────
 
-export async function sendMagicLink(email: string): Promise<void> {
+/** メールに 6 桁のログインコードを送る */
+export async function sendLoginCode(email: string): Promise<void> {
   const sb = getSupabase();
   if (!sb) throw new Error('この環境ではログインは不要です（デモモード）。');
   const base = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  const redirect = `${window.location.origin}${base}/auth/callback/`;
   const { error } = await sb.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: redirect },
+    options: {
+      shouldCreateUser: true,
+      // メールにはリンクも含まれるので、押した場合の戻り先も一応指定
+      emailRedirectTo: `${window.location.origin}${base}/auth/callback/`,
+    },
   });
+  if (error) throw error;
+}
+
+/** 受け取った 6 桁コードで検証してログイン完了 */
+export async function verifyLoginCode(email: string, code: string): Promise<void> {
+  const sb = getSupabase();
+  if (!sb) throw new Error('デモモードではログイン不要です。');
+  const { error } = await sb.auth.verifyOtp({ email, token: code.trim(), type: 'email' });
   if (error) throw error;
 }
 
