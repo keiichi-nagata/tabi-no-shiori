@@ -17,7 +17,7 @@ function collectChanges(it: Itinerary): SharedChanges {
       else transits.push({ id: item.id, memo: item.memo });
     }
   }
-  return { spots, transits };
+  return { spots, transits, packingNotes: it.packingNotes };
 }
 
 function Inner() {
@@ -98,12 +98,15 @@ function Inner() {
         onChange={(days) => setIt({ ...it, days })}
       />
 
-      {it.packingNotes && (
-        <div className="card mt-lg">
-          <h2>持ち物・共通メモ</h2>
-          <p style={{ whiteSpace: 'pre-wrap' }}>{it.packingNotes}</p>
-        </div>
-      )}
+      <div className="card mt-lg">
+        <h2>持ち物・共通メモ</h2>
+        <p className="muted" style={{ marginTop: 0 }}>持ち物・集合場所・緊急連絡先など、みんなで書き足せます。</p>
+        <textarea
+          value={it.packingNotes}
+          placeholder="持ち物、集合場所、緊急連絡先など"
+          onChange={(e) => setIt({ ...it, packingNotes: e.target.value })}
+        />
+      </div>
 
       <div className="card mt-lg">
         <button className="btn btn-primary" onClick={save} disabled={saving}>

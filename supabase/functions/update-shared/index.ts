@@ -6,6 +6,7 @@ import { checkPin } from '../_shared/guard.ts';
 interface Changes {
   spots?: { id: string; memo?: string }[];
   transits?: { id: string; memo?: string }[];
+  packingNotes?: string;
 }
 
 Deno.serve(async (req) => {
@@ -49,6 +50,12 @@ Deno.serve(async (req) => {
         ops.push(db.from('transits').update({ memo: t.memo }).eq('id', t.id));
       }
     }
+    if (typeof changes?.packingNotes === 'string') {
+      ops.push(
+        db.from('itineraries').update({ packing_notes: changes.packingNotes }).eq('id', id),
+      );
+    }
+
     const results = await Promise.all(ops);
     const failed = results.find((r) => r && r.error);
     if (failed) {

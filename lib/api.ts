@@ -535,6 +535,7 @@ export async function getSharedItinerary(id: string, pin: string): Promise<Share
 export interface SharedChanges {
   spots: { id: string; memo?: string }[];
   transits: { id: string; memo?: string }[];
+  packingNotes?: string;
 }
 
 export async function updateSharedItinerary(
@@ -555,6 +556,7 @@ export async function updateSharedItinerary(
         return ch ? { ...item, ...ch, needsReview: false } : item;
       });
     }
+    if (typeof changes.packingNotes === 'string') it.packingNotes = changes.packingNotes;
     localSaveItinerary(it);
     return { ok: true };
   }
