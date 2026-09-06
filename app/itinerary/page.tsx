@@ -24,6 +24,7 @@ function Inner() {
 
   const [it, setIt] = useState<Itinerary | null>(null);
   const [status, setStatus] = useState<'loading' | 'ok' | 'notfound'>('loading');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
@@ -37,16 +38,21 @@ function Inner() {
       setStatus('notfound');
       return;
     }
-    getOwnedItinerary(id).then((data) => {
-      if (data) {
-        setIt(data);
-        setStatus('ok');
-        // デモモードは PIN が手元にある。Supabase モードは作成直後のみ表示できる。
-        setPinShown(data.pin ?? (isNew ? lastPin : null));
-      } else {
+    getOwnedItinerary(id)
+      .then((data) => {
+        if (data) {
+          setIt(data);
+          setStatus('ok');
+          // デモモードは PIN が手元にある。Supabase モードは作成直後のみ表示できる。
+          setPinShown(data.pin ?? (isNew ? lastPin : null));
+        } else {
+          setStatus('notfound');
+        }
+      })
+      .catch((e) => {
+        setLoadError((e as Error).message || String(e));
         setStatus('notfound');
-      }
-    });
+      });
   }, [id, isNew, lastPin]);
 
   async function regeneratePin() {
@@ -93,6 +99,9 @@ function Inner() {
     return (
       <div className="page">
         <div className="notice warn">しおりが見つかりませんでした。</div>
+        {loadError && (
+          <p className="notice warn mt" style={{ whiteSpace: 'pre-wrap' }}>{loadError}</p>
+        )}
         <p className="muted mt">
           作成直後に表示されない場合は、ログインが切れている可能性があります。
           いったんログインし直してから「履歴」を開いてみてください。

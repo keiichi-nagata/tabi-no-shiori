@@ -295,7 +295,7 @@ export async function getOwnedItinerary(id: string): Promise<Itinerary | null> {
     .maybeSingle();
   if (itErr) {
     console.error('itinerary 取得エラー:', itErr);
-    return null;
+    throw new Error(`DB エラー: ${itErr.message}（code ${itErr.code ?? '-'}）`);
   }
   if (!data) return null;
   const row = data as unknown as {
@@ -319,7 +319,7 @@ export async function getOwnedItinerary(id: string): Promise<Itinerary | null> {
     .eq('itinerary_id', id);
   if (dayErr) {
     console.error('days 取得エラー:', dayErr);
-    return null;
+    throw new Error(`DB エラー（days）: ${dayErr.message}（code ${dayErr.code ?? '-'}）`);
   }
 
   return {
