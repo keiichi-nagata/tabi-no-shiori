@@ -389,8 +389,14 @@ export async function updateOwnedItinerary(it: Itinerary): Promise<void> {
   const results = await Promise.all(
     updates.map((p) => Promise.resolve(p).catch((e) => ({ error: e }))),
   );
-  if (results.some((r) => r && r.error)) {
-    throw new Error('保存に失敗しました。時間をおいて再度お試しください。');
+  const failed = results.find((r) => r && (r as { error?: unknown }).error) as
+    | { error: { message?: string; code?: string } }
+    | undefined;
+  if (failed) {
+    console.error('updateOwnedItinerary 失敗:', failed.error);
+    throw new Error(
+      `保存に失敗しました: ${failed.error?.message ?? '不明なエラー'}（code ${failed.error?.code ?? '-'}）`,
+    );
   }
 }
 

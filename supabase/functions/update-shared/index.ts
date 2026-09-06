@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     const validSpots = new Set((spotRows ?? []).map((r) => r.id));
     const validTransits = new Set((transitRows ?? []).map((r) => r.id));
 
-    const ops: Promise<unknown>[] = [];
+    const ops: PromiseLike<{ error: { message?: string } | null }>[] = [];
     for (const s of changes?.spots ?? []) {
       if (validSpots.has(s.id) && typeof s.memo === 'string') {
         ops.push(db.from('spots').update({ memo: s.memo }).eq('id', s.id));
@@ -49,7 +49,12 @@ Deno.serve(async (req) => {
         ops.push(db.from('transits').update({ memo: t.memo }).eq('id', t.id));
       }
     }
-    await Promise.all(ops);
+    const results = await Promise.all(ops);
+    const failed = results.find((r) => r && r.error);
+    if (failed) {
+      console.error('update-shared 失敗:', failed.error);
+      return json({ error: `保存に失敗: ${failed.error?.message ?? '不明'}` }, 500);
+    }
 
     return json({ ok: true, updated: ops.length });
   } catch (e) {
