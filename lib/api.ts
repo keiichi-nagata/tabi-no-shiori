@@ -279,17 +279,25 @@ export async function resetPin(id: string, customPin?: string): Promise<string> 
 // 所有者としての取得・更新
 // ─────────────────────────────────────────────────────────────
 
-const OWNED_SELECT =
-  '*, days(id, day_index, date, theme, spots(id, "order", kind, time, name, note, memo, is_ai_suggested), transits(id, "order", mode, duration, note, memo))';
-
 export async function getOwnedItinerary(id: string): Promise<Itinerary | null> {
   if (!isSupabaseConfigured()) return localGetItinerary(id);
 
   const sb = getSupabase();
   if (!sb) return null;
-  const { data, error } = await sb.from('itineraries').select(OWNED_SELECT).eq('id', id).single();
-  if (error || !data) return null;
 
+  // 認証セッションの復元を待ってから RLS 保護のテーブルを読む
+  await sb.auth.getSession();
+
+  const { data, error: itErr } = await sb
+    .from('itineraries')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  if (itErr) {
+    console.error('itinerary 取得エラー:', itErr);
+    return null;
+  }
+  if (!data) return null;
   const row = data as unknown as {
     id: string;
     title: string;
@@ -303,8 +311,16 @@ export async function getOwnedItinerary(id: string): Promise<Itinerary | null> {
     packing_notes: string | null;
     plan_meta: Itinerary['planMeta'];
     created_at: string;
-    days: DayRow[];
   };
+
+  const { data: dayRows, error: dayErr } = await sb
+    .from('days')
+    .select('id, day_index, date, theme, spots(*), transits(*)')
+    .eq('itinerary_id', id);
+  if (dayErr) {
+    console.error('days 取得エラー:', dayErr);
+    return null;
+  }
 
   return {
     id: row.id,
@@ -323,7 +339,7 @@ export async function getOwnedItinerary(id: string): Promise<Itinerary | null> {
       arrivalPlace: '',
     },
     planMeta: row.plan_meta ?? null,
-    days: rowsToDays(row.days ?? []),
+    days: rowsToDays((dayRows ?? []) as unknown as DayRow[]),
     packingNotes: row.packing_notes ?? '',
     createdAt: row.created_at,
   };
@@ -338,6 +354,7 @@ export async function updateOwnedItinerary(it: Itinerary): Promise<void> {
   }
   const sb = getSupabase();
   if (!sb) throw new Error('Supabase 未設定');
+  await sb.auth.getSession();
 
   const updates: PromiseLike<{ error: unknown }>[] = [
     sb.from('itineraries').update({ title: it.title, packing_notes: it.packingNotes }).eq('id', it.id),
@@ -387,6 +404,7 @@ export async function saveExistingItinerary(it: Itinerary): Promise<void> {
   }
   const sb = getSupabase();
   if (!sb) throw new Error('Supabase 未設定');
+  await sb.auth.getSession();
 
   const del = await sb.from('days').delete().eq('itinerary_id', it.id);
   if (del.error) throw new Error(del.error.message);
@@ -453,6 +471,7 @@ export async function deleteItinerary(id: string): Promise<void> {
   }
   const sb = getSupabase();
   if (!sb) throw new Error('Supabase 未設定');
+  await sb.auth.getSession();
   const { error } = await sb.from('itineraries').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
@@ -462,10 +481,12 @@ export async function listHistory(): Promise<ItinerarySummary[]> {
 
   const sb = getSupabase();
   if (!sb) return [];
+  await sb.auth.getSession();
   const { data, error } = await sb
     .from('itineraries')
     .select('id, title, destination, start_date, end_date, created_at')
     .order('created_at', { ascending: false });
+  if (error) console.error('history 取得エラー:', error);
   if (error || !data) return [];
   return (data as any[]).map((r) => ({
     id: r.id,

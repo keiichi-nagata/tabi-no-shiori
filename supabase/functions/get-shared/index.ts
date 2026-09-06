@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
 
     const { data: dayRows, error } = await db
       .from('days')
-      .select('id, day_index, date, theme, spots(id, "order", kind, time, name, note, memo, is_ai_suggested), transits(id, "order", mode, duration, note, memo)')
+      .select('id, day_index, date, theme, spots(*), transits(*)')
       .eq('itinerary_id', id);
     if (error) throw new Error(error.message);
 

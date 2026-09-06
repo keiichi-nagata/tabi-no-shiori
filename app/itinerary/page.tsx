@@ -93,7 +93,15 @@ function Inner() {
     return (
       <div className="page">
         <div className="notice warn">しおりが見つかりませんでした。</div>
-        <Link className="btn btn-ghost mt" href="/history">履歴へ</Link>
+        <p className="muted mt">
+          作成直後に表示されない場合は、ログインが切れている可能性があります。
+          いったんログインし直してから「履歴」を開いてみてください。
+        </p>
+        <div className="chips mt">
+          <Link className="btn btn-primary" href="/login">ログイン</Link>
+          <Link className="btn btn-ghost" href="/history">履歴へ</Link>
+          <button className="btn btn-ghost" onClick={() => location.reload()}>再読み込み</button>
+        </div>
       </div>
     );
 
