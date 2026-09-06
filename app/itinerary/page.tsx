@@ -19,8 +19,8 @@ function shareUrl(id: string): string {
 function Inner() {
   const params = useSearchParams();
   const id = params.get('id') || '';
-  const isNew = params.get('new') === '1';
   const lastPin = useDraft((s) => s.lastPin);
+  const lastPinId = useDraft((s) => s.lastPinId);
 
   const [it, setIt] = useState<Itinerary | null>(null);
   const [status, setStatus] = useState<'loading' | 'ok' | 'notfound'>('loading');
@@ -43,8 +43,8 @@ function Inner() {
         if (data) {
           setIt(data);
           setStatus('ok');
-          // デモモードは PIN が手元にある。Supabase モードは作成直後のみ表示できる。
-          setPinShown(data.pin ?? (isNew ? lastPin : null));
+          // デモモードは PIN が手元にある。Supabase モードは直近に発行/変更した PIN を localStorage から。
+          setPinShown(data.pin ?? (lastPinId === id ? lastPin : null));
         } else {
           setStatus('notfound');
         }
@@ -53,7 +53,7 @@ function Inner() {
         setLoadError((e as Error).message || String(e));
         setStatus('notfound');
       });
-  }, [id, isNew, lastPin]);
+  }, [id, lastPin, lastPinId]);
 
   async function regeneratePin() {
     if (pinDraft && !/^\d{4}$/.test(pinDraft)) {
@@ -64,7 +64,7 @@ function Inner() {
     try {
       const newPin = await resetPin(id, pinDraft || undefined);
       setPinShown(newPin);
-      useDraft.getState().setLastPin(newPin);
+      useDraft.getState().setLastPin(newPin, id);
       setPinDraft('');
     } catch (e) {
       alert((e as Error).message);

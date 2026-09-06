@@ -130,7 +130,7 @@ function DraftEditor() {
         days: formatted.days,
         packingNotes: formatted.packingNotes,
       });
-      setLastPin(pin);
+      setLastPin(pin, id);
       router.push(`/itinerary/?id=${id}&new=1`);
     } catch (e) {
       const msg = (e as Error).message || '';

@@ -23,8 +23,9 @@ interface DraftState {
   plans: Plan[];
   selectedPlanIndex: number | null;
   days: EditDay[];
-  /** 直近に発行された PIN（完成画面で一度だけ表示）。永続化しない。 */
+  /** 直近に発行された PIN と、それがどのしおりのものか（完成画面での表示用。localStorage に保持） */
   lastPin: string | null;
+  lastPinId: string | null;
 
   setInput: (patch: Partial<TripInput>) => void;
   resetInput: () => void;
@@ -32,7 +33,7 @@ interface DraftState {
   updatePlanSpots: (index: number, spots: PlanSpot[]) => void;
   selectPlan: (index: number, days: EditDay[]) => void;
   setDays: (days: EditDay[]) => void;
-  setLastPin: (pin: string | null) => void;
+  setLastPin: (pin: string | null, itineraryId?: string | null) => void;
   clearDraft: () => void;
 }
 
@@ -44,6 +45,7 @@ export const useDraft = create<DraftState>()(
       selectedPlanIndex: null,
       days: [],
       lastPin: null,
+      lastPinId: null,
 
       setInput: (patch) => set((s) => ({ input: { ...s.input, ...patch } })),
       resetInput: () => set({ input: emptyInput }),
@@ -54,18 +56,20 @@ export const useDraft = create<DraftState>()(
         })),
       selectPlan: (index, days) => set({ selectedPlanIndex: index, days }),
       setDays: (days) => set({ days }),
-      setLastPin: (pin) => set({ lastPin: pin }),
+      setLastPin: (pin, itineraryId) => set({ lastPin: pin, lastPinId: itineraryId ?? null }),
       clearDraft: () =>
-        set({ input: emptyInput, plans: [], selectedPlanIndex: null, days: [], lastPin: null }),
+        set({ input: emptyInput, plans: [], selectedPlanIndex: null, days: [] }),
     }),
     {
       name: 'shiori:draft',
-      version: 2,
+      version: 3,
       partialize: (s) => ({
         input: s.input,
         plans: s.plans,
         selectedPlanIndex: s.selectedPlanIndex,
         days: s.days,
+        lastPin: s.lastPin,
+        lastPinId: s.lastPinId,
       }),
       // 旧バージョンの保存データに新しいキー（lodgings 等）が無くても壊れないようにする
       merge: (persisted, current) => {

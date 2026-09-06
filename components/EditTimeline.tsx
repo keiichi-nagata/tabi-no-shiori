@@ -173,17 +173,6 @@ function DayEditor({
         />
       </div>
 
-      {/* テーマの下（1件目のスポットの前）にも移動ブロックを置ける */}
-      {day.items[0]?.type !== 'transit' && (
-        <button
-          className="btn btn-ghost btn-sm"
-          style={{ marginBottom: 6 }}
-          onClick={() => setItems([newTransit(), ...day.items])}
-        >
-          ＋ 先頭に移動ブロック（駅→ホテル など）
-        </button>
-      )}
-
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={day.items.map((it) => it.id)} strategy={verticalListSortingStrategy}>
           <div className="timeline">

@@ -47,7 +47,6 @@ Deno.serve(async (req) => {
       '新しいスポットや移動を追加してはいけません。件数・順番・時刻・スポット名は変更しないこと。',
       '出力は有効な JSON のみ（説明文・コードフェンス禁止）。形式:',
       '{ "title": string,',
-      '  "packing_notes": string,   // 家族旅行向けの持ち物・共通メモを箇条書き（改行区切り）で',
       '  "days": [ { "id": string, "theme": string,',
       '             "spots": [ { "id": string, "note": string } ] } ] }',
       'theme は各日の一言テーマ。note は各スポットの短い補足（20〜40字、なければ空文字）。id は入力のものをそのまま返す。',
@@ -59,12 +58,11 @@ Deno.serve(async (req) => {
       '確定済みの旅程:',
       JSON.stringify(compact),
       '',
-      '上記の id を保ったまま、theme と note を整え、packing_notes を作成して JSON を出力してください。',
+      '上記の id を保ったまま、theme と note を整えて JSON を出力してください。',
     ].join('\n');
 
     let polished: {
       title?: string;
-      packing_notes?: string;
       days?: { id: string; theme?: string; spots?: { id: string; note?: string }[] }[];
     } = {};
     try {
@@ -96,7 +94,7 @@ Deno.serve(async (req) => {
       itinerary: {
         title: polished.title || title,
         days: merged,
-        packingNotes: polished.packing_notes ?? '',
+        packingNotes: '', // 持ち物・共通メモは自動生成しない（ユーザーが自分で記入）
       },
     });
   } catch (e) {
