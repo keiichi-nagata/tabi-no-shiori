@@ -79,29 +79,24 @@ npm run dev
 
 #### 3-2. Edge Functions をデプロイ
 
+Supabase CLI は `npx supabase@latest`（Docker 不要）。`<ref>` は Supabase の **Project Settings → General → Reference ID**。
+
 ```bash
-npm i -g supabase
-supabase login
-supabase link --project-ref <your-project-ref>
+npx supabase@latest login                       # 初回のみ。ブラウザで承認
 
 # AI キーなどのシークレット（関数側だけで使用）
-supabase secrets set ANTHROPIC_API_KEY=sk-ant-xxxxx
-supabase secrets set ANTHROPIC_MODEL=claude-sonnet-5   # 任意
+npx supabase@latest secrets set --project-ref <ref> ANTHROPIC_API_KEY=sk-ant-xxxxx
+npx supabase@latest secrets set --project-ref <ref> ANTHROPIC_MODEL=claude-sonnet-5   # 任意
 
-supabase functions deploy generate-plans
-supabase functions deploy estimate-transit
-supabase functions deploy format-itinerary
-supabase functions deploy create-itinerary
-supabase functions deploy reset-pin
-supabase functions deploy get-shared
-supabase functions deploy update-shared
+# 7 関数を一括デプロイ
+bash scripts/deploy-functions.sh <ref>
+# 個別なら: npx supabase@latest functions deploy generate-plans --project-ref <ref> --no-verify-jwt  …（7本）
 ```
 
-まとめて実行するには `bash scripts/deploy-functions.sh`（`supabase link` 済みであること）。
-
-> `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` はデプロイ済み関数に自動で注入されます。設定不要です。
-> 各関数は `verify_jwt = false`（[`supabase/config.toml`](supabase/config.toml)）。認証は関数内で行います
-> （`create-itinerary` は JWT 検証、`get-shared` / `update-shared` は PIN 照合）。
+> `supabase link`（DBパスワードが必要）は不要です。`--project-ref` を各コマンドに渡します。
+> `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` はデプロイ済み関数に自動注入されます。設定不要です。
+> 認証は関数内で行うため全関数 `--no-verify-jwt`（`create-itinerary` / `reset-pin` は関数内で JWT 検証、
+> `get-shared` / `update-shared` は PIN 照合）。
 
 #### 3-3. Auth のリダイレクト URL を許可
 
