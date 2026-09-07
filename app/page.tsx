@@ -7,14 +7,8 @@ import { generatePlans } from '@/lib/api';
 import { formatJPDate, formatRange, nights, dateRange } from '@/lib/format';
 import { TagInput } from '@/components/TagInput';
 import { TimePicker } from '@/components/TimePicker';
+import { NumberField } from '@/components/NumberField';
 import { DemoBanner } from '@/components/DemoBanner';
-
-/** 数値入力: 先頭ゼロを除去してパースし、範囲内の整数に丸める */
-function clampInt(raw: string, min: number, max: number, fallback: number): number {
-  const n = parseInt(raw.replace(/[^\d]/g, ''), 10);
-  if (Number.isNaN(n)) return fallback;
-  return Math.min(max, Math.max(min, n));
-}
 
 export default function InputPage() {
   const router = useRouter();
@@ -148,28 +142,26 @@ export default function InputPage() {
           <div className="row">
             <div>
               <span className="muted">大人</span>
-              <input
-                type="number"
-                min={1}
-                inputMode="numeric"
+              <NumberField
                 value={input.adults}
-                onFocus={(e) => e.currentTarget.select()}
-                onChange={(e) => setInput({ adults: clampInt(e.target.value, 1, 20, 1) })}
+                min={1}
+                max={20}
+                fallback={1}
+                ariaLabel="大人の人数"
+                onChange={(n) => setInput({ adults: n })}
               />
             </div>
             <div>
               <span className="muted">子ども</span>
-              <input
-                type="number"
-                min={0}
-                inputMode="numeric"
+              <NumberField
                 value={input.children.length}
-                onFocus={(e) => e.currentTarget.select()}
-                onChange={(e) => {
-                  const n = clampInt(e.target.value, 0, 12, 0);
-                  const next = Array.from({ length: n }, (_, i) => input.children[i] ?? 6);
-                  setInput({ children: next });
-                }}
+                min={0}
+                max={12}
+                fallback={0}
+                ariaLabel="子どもの人数"
+                onChange={(n) =>
+                  setInput({ children: Array.from({ length: n }, (_, i) => input.children[i] ?? 6) })
+                }
               />
             </div>
           </div>
@@ -178,14 +170,13 @@ export default function InputPage() {
               {input.children.map((age, i) => (
                 <div key={i} style={{ flex: '0 0 120px' }}>
                   <span className="muted">{i + 1}人目の年齢</span>
-                  <input
-                    type="number"
+                  <NumberField
+                    value={age}
                     min={0}
                     max={17}
-                    inputMode="numeric"
-                    value={age}
-                    onFocus={(e) => e.currentTarget.select()}
-                    onChange={(e) => setChildAge(i, clampInt(e.target.value, 0, 17, 0))}
+                    fallback={0}
+                    ariaLabel={`${i + 1}人目の子どもの年齢`}
+                    onChange={(n) => setChildAge(i, n)}
                   />
                 </div>
               ))}
