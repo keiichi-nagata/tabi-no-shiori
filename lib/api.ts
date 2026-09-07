@@ -569,30 +569,26 @@ export async function updateSharedItinerary(
 }
 
 // ─────────────────────────────────────────────────────────────
-// 認証（メールの 6 桁コード。リンクではないので iOS のホーム画面追加でも動く）
+// 認証（メール＋パスワード。メール送信なしなので iOS ホーム画面追加でも動く）
 // ─────────────────────────────────────────────────────────────
 
-/** メールに 6 桁のログインコードを送る */
-export async function sendLoginCode(email: string): Promise<void> {
+/** 新規登録。メール確認 OFF ならその場でセッション確立、ON なら確認待ち。 */
+export async function signUpPassword(
+  email: string,
+  password: string,
+): Promise<{ needsConfirm: boolean }> {
   const sb = getSupabase();
   if (!sb) throw new Error('この環境ではログインは不要です（デモモード）。');
-  const base = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  const { error } = await sb.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: true,
-      // メールにはリンクも含まれるので、押した場合の戻り先も一応指定
-      emailRedirectTo: `${window.location.origin}${base}/auth/callback/`,
-    },
-  });
+  const { data, error } = await sb.auth.signUp({ email, password });
   if (error) throw error;
+  return { needsConfirm: !data.session };
 }
 
-/** 受け取った 6 桁コードで検証してログイン完了 */
-export async function verifyLoginCode(email: string, code: string): Promise<void> {
+/** ログイン */
+export async function signInPassword(email: string, password: string): Promise<void> {
   const sb = getSupabase();
   if (!sb) throw new Error('デモモードではログイン不要です。');
-  const { error } = await sb.auth.verifyOtp({ email, token: code.trim(), type: 'email' });
+  const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) throw error;
 }
 
