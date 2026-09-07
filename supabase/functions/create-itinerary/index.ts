@@ -65,6 +65,7 @@ Deno.serve(async (req) => {
         plan_meta: body.planMeta ?? {},
         pin_hash: hash,
         pin_salt: salt,
+        pin: body.pin, // 作成者本人のみ RLS で閲覧可（共有 API は返さない）
       })
       .select('id')
       .single();

@@ -9,6 +9,13 @@ import { TagInput } from '@/components/TagInput';
 import { TimePicker } from '@/components/TimePicker';
 import { DemoBanner } from '@/components/DemoBanner';
 
+/** 数値入力: 先頭ゼロを除去してパースし、範囲内の整数に丸める */
+function clampInt(raw: string, min: number, max: number, fallback: number): number {
+  const n = parseInt(raw.replace(/[^\d]/g, ''), 10);
+  if (Number.isNaN(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
 export default function InputPage() {
   const router = useRouter();
   const { input, setInput } = useDraft();
@@ -144,8 +151,10 @@ export default function InputPage() {
               <input
                 type="number"
                 min={1}
+                inputMode="numeric"
                 value={input.adults}
-                onChange={(e) => setInput({ adults: Math.max(1, Number(e.target.value) || 1) })}
+                onFocus={(e) => e.currentTarget.select()}
+                onChange={(e) => setInput({ adults: clampInt(e.target.value, 1, 20, 1) })}
               />
             </div>
             <div>
@@ -153,9 +162,11 @@ export default function InputPage() {
               <input
                 type="number"
                 min={0}
+                inputMode="numeric"
                 value={input.children.length}
+                onFocus={(e) => e.currentTarget.select()}
                 onChange={(e) => {
-                  const n = Math.max(0, Number(e.target.value) || 0);
+                  const n = clampInt(e.target.value, 0, 12, 0);
                   const next = Array.from({ length: n }, (_, i) => input.children[i] ?? 6);
                   setInput({ children: next });
                 }}
@@ -171,8 +182,10 @@ export default function InputPage() {
                     type="number"
                     min={0}
                     max={17}
+                    inputMode="numeric"
                     value={age}
-                    onChange={(e) => setChildAge(i, Math.max(0, Number(e.target.value) || 0))}
+                    onFocus={(e) => e.currentTarget.select()}
+                    onChange={(e) => setChildAge(i, clampInt(e.target.value, 0, 17, 0))}
                   />
                 </div>
               ))}

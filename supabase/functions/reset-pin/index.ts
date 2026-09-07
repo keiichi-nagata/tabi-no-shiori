@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     const { hash, salt } = await hashPin(pin);
     const { error } = await db
       .from('itineraries')
-      .update({ pin_hash: hash, pin_salt: salt })
+      .update({ pin_hash: hash, pin_salt: salt, pin })
       .eq('id', id);
     if (error) throw new Error(error.message);
 

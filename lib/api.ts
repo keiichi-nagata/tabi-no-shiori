@@ -311,6 +311,7 @@ export async function getOwnedItinerary(id: string): Promise<Itinerary | null> {
     packing_notes: string | null;
     plan_meta: Itinerary['planMeta'];
     created_at: string;
+    pin: string | null;
   };
 
   const { data: dayRows, error: dayErr } = await sb
@@ -342,6 +343,7 @@ export async function getOwnedItinerary(id: string): Promise<Itinerary | null> {
     days: rowsToDays((dayRows ?? []) as unknown as DayRow[]),
     packingNotes: row.packing_notes ?? '',
     createdAt: row.created_at,
+    pin: row.pin ?? undefined,
   };
 }
 
