@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
       .filter(Boolean)
       .join('\n');
 
-    const text = await callClaude({ system, user, maxTokens: 300 });
+    const text = await callClaude({ system, user, maxTokens: 700 });
     const parsed = extractJson<{ duration?: string; note?: string; confidence?: string }>(text);
 
     const duration = String(parsed.duration ?? '').trim();

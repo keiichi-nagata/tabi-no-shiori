@@ -177,12 +177,21 @@ export async function estimateTransit(args: {
       confidence: 'low',
     };
   }
-  const out = await callFunction<TransitEstimate>('estimate-transit', args);
-  return {
-    duration: out.duration || '',
-    note: out.note || '',
-    confidence: out.confidence || 'low',
-  };
+  try {
+    const out = await callFunction<TransitEstimate>('estimate-transit', args);
+    return {
+      duration: out.duration || '',
+      note: out.note || '',
+      confidence: out.confidence || 'low',
+    };
+  } catch (e) {
+    console.warn('estimate-transit 失敗', e);
+    return {
+      duration: '',
+      note: '所要時間を自動取得できませんでした。もう一度試すか、手動で入力してください。',
+      confidence: 'low',
+    };
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
