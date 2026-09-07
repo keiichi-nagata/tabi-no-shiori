@@ -27,6 +27,12 @@ export default function LoginPage() {
     );
   }
 
+  function switchMode(m: 'signin' | 'signup') {
+    setMode(m);
+    setError(null);
+    setInfo(null);
+  }
+
   async function submit() {
     setError(null);
     setInfo(null);
@@ -43,7 +49,7 @@ export default function LoginPage() {
       if (mode === 'signup') {
         const { needsConfirm } = await signUpPassword(email, password);
         if (needsConfirm) {
-          setInfo('確認メールを送りました。メール内のリンクを開いた後、ログインしてください。');
+          setInfo('確認メールを送りました。メール内のリンクを開いた後、「ログイン」タブからログインしてください。');
           setMode('signin');
         } else {
           router.replace('/history');
@@ -53,7 +59,14 @@ export default function LoginPage() {
         router.replace('/history');
       }
     } catch (e) {
-      setError((e as Error).message || 'うまくいきませんでした。');
+      const msg = (e as Error).message || '';
+      if (/already registered|already exists/i.test(msg)) {
+        setError('このメールアドレスは登録済みです。「ログイン」タブからログインしてください（パスワードが不明なら、Supabase の Authentication → Users でこのユーザーを削除して登録し直してください）。');
+      } else if (/invalid login credentials/i.test(msg)) {
+        setError('メールアドレスかパスワードが違います。はじめての方は「新規登録」タブから登録してください。');
+      } else {
+        setError(msg || 'うまくいきませんでした。');
+      }
     } finally {
       setLoading(false);
     }
@@ -62,14 +75,27 @@ export default function LoginPage() {
   return (
     <div className="page">
       <div className="panel-navy">
-        <span className="stamp-title">ログイン</span>
-        <h1 style={{ marginTop: 14 }}>{mode === 'signin' ? 'ログイン' : '新規登録'}</h1>
-        <p style={{ opacity: 0.9, margin: 0 }}>
-          メールアドレスとパスワードだけ。履歴保存のためだけに使います。
-        </p>
+        <span className="stamp-title">アカウント</span>
+        <h1 style={{ marginTop: 14 }}>メール＋パスワード</h1>
+        <p style={{ opacity: 0.9, margin: 0 }}>履歴保存のためだけに使います。メールは送られません。</p>
       </div>
 
       <div className="card mt-lg">
+        <div className="chips" style={{ marginBottom: 16 }}>
+          <button
+            className={`btn btn-sm ${mode === 'signin' ? 'btn-primary' : 'btn-ghost'}`}
+            onClick={() => switchMode('signin')}
+          >
+            ログイン
+          </button>
+          <button
+            className={`btn btn-sm ${mode === 'signup' ? 'btn-primary' : 'btn-ghost'}`}
+            onClick={() => switchMode('signup')}
+          >
+            新規登録（はじめての方）
+          </button>
+        </div>
+
         <div className="field">
           <label>メールアドレス</label>
           <input
@@ -102,33 +128,9 @@ export default function LoginPage() {
           ) : mode === 'signin' ? (
             'ログイン'
           ) : (
-            'この内容で登録'
+            'この内容で登録してはじめる'
           )}
         </button>
-
-        <p className="muted mt">
-          {mode === 'signin' ? (
-            <>
-              はじめての方は{' '}
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => { setMode('signup'); setError(null); setInfo(null); }}
-              >
-                新規登録
-              </button>
-            </>
-          ) : (
-            <>
-              登録済みの方は{' '}
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => { setMode('signin'); setError(null); setInfo(null); }}
-              >
-                ログイン
-              </button>
-            </>
-          )}
-        </p>
       </div>
     </div>
   );
