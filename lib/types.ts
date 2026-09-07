@@ -57,7 +57,7 @@ export interface SpotItem {
 export interface TransitItem {
   id: string;
   type: 'transit';
-  mode: string; // 徒歩／電車／バス／車／自由入力
+  mode: string; // 徒歩／電車／バス／車／飛行機／自由入力
   duration: string;
   note: string; // 備考（列車番号・乗換など。編集画面で設定、しおりに表示）
   memo: string; // メモ（旅行中の記録）

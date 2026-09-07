@@ -1,0 +1,7 @@
+/* スクショ用: 表示幅・フォント読み込み・自動クロップしやすい平坦な背景 */
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+html, body { width: 800px; }
+body { background-image: none !important; background-color: #f5edd9 !important; }
+main { padding-bottom: 10px; }
+input, select, textarea { font-size: 14px; }
+textarea { min-height: 44px; }

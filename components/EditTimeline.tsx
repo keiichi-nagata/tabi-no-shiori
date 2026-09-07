@@ -24,7 +24,7 @@ import { spotSearchUrl } from '@/lib/links';
 import { spotNotePlaceholder, spotRoleLabel } from '@/lib/spotRole';
 import { TransitEstimateButton } from '@/components/TransitEstimateButton';
 
-const PRESET_MODES = ['徒歩', '電車', 'バス', '車'];
+const PRESET_MODES = ['徒歩', '電車', 'バス', '車', '飛行機'];
 
 interface Props {
   days: EditDay[];

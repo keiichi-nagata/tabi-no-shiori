@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy: #17324f; --navy-deep: #0f2338; --paper: #f5edd9;
+    --brass: #b0863a; --brass-soft: #cba85c; --stamp: #b5382e; --ink: #2c2a24; --ink-soft: #6b6455;
+    --mincho: 'Shippori Mincho', serif; --gothic: 'Zen Kaku Gothic New', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1280px; height: 670px; overflow: hidden; font-family: var(--gothic); }
+  .bg {
+    width: 1280px; height: 670px; position: relative;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(203,168,92,.22), transparent 42%),
+      radial-gradient(circle at 92% 96%, rgba(203,168,92,.14), transparent 46%),
+      var(--navy);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .bg::before {
+    content: ""; position: absolute; inset: 26px;
+    border: 2px solid rgba(203,168,92,.45); border-radius: 8px;
+  }
+  .card {
+    position: relative; width: 1060px; height: 500px; background: var(--paper);
+    border-radius: 12px; box-shadow: 0 30px 70px rgba(0,0,0,.4);
+    padding: 56px 64px; display: flex; flex-direction: column; justify-content: space-between;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 37px, rgba(178,141,63,.10) 37px, rgba(178,141,63,.10) 38px);
+  }
+  .top { display: flex; align-items: flex-start; justify-content: space-between; }
+  .kicker { font-family: var(--mincho); font-weight: 700; color: var(--stamp);
+    border: 2.5px solid var(--stamp); border-radius: 8px; padding: 5px 16px; font-size: 22px;
+    letter-spacing: .12em; transform: rotate(-2.5deg); }
+  .seal {
+    width: 116px; height: 116px; border: 4px solid var(--stamp); border-radius: 50%;
+    display: grid; place-items: center; color: var(--stamp); font-family: var(--mincho);
+    font-weight: 800; font-size: 44px; transform: rotate(7deg);
+    box-shadow: inset 0 0 0 3px rgba(181,56,46,.25);
+  }
+  h1 { font-family: var(--mincho); font-weight: 800; color: var(--navy);
+    font-size: 104px; line-height: 1.05; letter-spacing: .04em; margin: 6px 0 10px; }
+  .sub { font-size: 30px; font-weight: 700; color: var(--ink); line-height: 1.5; }
+  .sub .accent { color: var(--brass); }
+  .dots { display: flex; align-items: center; gap: 10px; margin: 22px 0 8px; }
+  .dots .line { flex: 1; border-top: 2px dashed var(--brass-soft); }
+  .dots .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--paper); border: 3px solid var(--brass); }
+  .foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .chip { font-weight: 700; font-size: 21px; color: var(--navy);
+    background: rgba(178,141,63,.16); border: 1.5px solid var(--brass-soft);
+    border-radius: 999px; padding: 8px 20px; }
+  .chip.solid { background: var(--navy); color: var(--paper); border-color: var(--navy); }
+</style>
+</head>
+<body>
+  <div class="bg">
+    <div class="card">
+      <div class="top">
+        <span class="kicker">つくって公開ガイド</span>
+        <div class="seal">旅</div>
+      </div>
+      <div>
+        <h1>旅のしおり</h1>
+        <p class="sub">
+          日程と行き先を入れると <span class="accent">AI が旅程を5案提案</span>。<br />
+          手直しして、<span class="accent">PIN付きURL</span>で家族と共有できるアプリ。
+        </p>
+        <div class="dots"><span class="dot"></span><span class="line"></span><span class="dot"></span><span class="line"></span><span class="dot"></span></div>
+      </div>
+      <div class="foot">
+        <span class="chip solid">GitHub Pages で無料公開</span>
+        <span class="chip">Next.js × Supabase × Claude</span>
+        <span class="chip">Claude Code で改造</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
