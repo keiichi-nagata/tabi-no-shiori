@@ -59,7 +59,7 @@ export function ItineraryTimeline({ days, area = '', editable = false, onChange 
                     <div className="sname">
                       {role ? (
                         role
-                      ) : item.isAiSuggested ? (
+                      ) : item.name ? (
                         <a href={spotSearchUrl(item.name, area)} target="_blank" rel="noreferrer">
                           {item.name}
                         </a>
@@ -67,7 +67,17 @@ export function ItineraryTimeline({ days, area = '', editable = false, onChange 
                         item.name
                       )}
                     </div>
-                    {role && item.name && <div className="muted">{item.name}</div>}
+                    {role && item.name && (
+                      <div className="muted">
+                        {item.kind === 'hotel' ? (
+                          <a href={spotSearchUrl(item.name, area)} target="_blank" rel="noreferrer">
+                            {item.name}
+                          </a>
+                        ) : (
+                          item.name
+                        )}
+                      </div>
+                    )}
                     {item.note && <div className="muted">{item.note}</div>}
 
                     {editable ? (

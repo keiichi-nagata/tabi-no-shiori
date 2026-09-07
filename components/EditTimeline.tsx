@@ -20,6 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import type { EditDay, SpotItem, TimelineItem, TransitItem } from '@/lib/types';
 import { formatJPDate } from '@/lib/format';
+import { spotSearchUrl } from '@/lib/links';
 import { spotNotePlaceholder, spotRoleLabel } from '@/lib/spotRole';
 import { TransitEstimateButton } from '@/components/TransitEstimateButton';
 
@@ -343,7 +344,22 @@ function SpotFields({
           <input type="time" value={item.time} onChange={(e) => onPatch(item.id, { time: e.target.value })} />
         </div>
         <div style={{ flex: '1 1 200px' }}>
-          <label>{nameLabel}</label>
+          <label>
+            {nameLabel}
+            {item.name.trim() && role !== '出発地' && role !== '到着地' && (
+              <>
+                {'　'}
+                <a
+                  href={spotSearchUrl(item.name)}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ fontWeight: 400, fontSize: 12 }}
+                >
+                  🔎 検索
+                </a>
+              </>
+            )}
+          </label>
           <input
             type="text"
             value={item.name}

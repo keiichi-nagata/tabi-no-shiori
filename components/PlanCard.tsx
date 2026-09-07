@@ -42,7 +42,7 @@ export function PlanCard({ plan, index, input, onSelect, onRemoveSpot }: Props) 
 
       <hr className="rule" />
 
-      {/* 行き先タグ（× で削除。AIおすすめ名は地図で開く） */}
+      {/* 行き先タグ（× で削除。名前タップで検索） */}
       <p className="muted" style={{ marginBottom: 6 }}>
         行き先（<span style={{ color: '#7a5a1e' }}>✦</span> は AI のおすすめ。名前タップで検索、× で除外）
       </p>
@@ -50,13 +50,9 @@ export function PlanCard({ plan, index, input, onSelect, onRemoveSpot }: Props) 
         {plan.spots.length === 0 && <span className="muted">スポットがありません</span>}
         {plan.spots.map((s, i) => (
           <span key={`${s.name}-${i}`} className={s.isAiSuggested ? 'chip ai' : 'chip'}>
-            {s.isAiSuggested ? (
-              <a href={spotSearchUrl(s.name, area)} target="_blank" rel="noreferrer">
-                {s.name}
-              </a>
-            ) : (
-              s.name
-            )}
+            <a href={spotSearchUrl(s.name, area)} target="_blank" rel="noreferrer">
+              {s.name}
+            </a>
             <button type="button" aria-label={`${s.name} を外す`} onClick={() => onRemoveSpot(index, s.name)}>
               ×
             </button>
@@ -86,12 +82,23 @@ export function PlanCard({ plan, index, input, onSelect, onRemoveSpot }: Props) 
                         <span className="mini-time">{it.time || '—'}</span>
                         <span>
                           {it.kind === 'hotel' ? '🛏 ' : ''}
-                          {role ? (
+                          {role === '出発地' || role === '到着地' ? (
                             <>
                               <b style={{ fontWeight: 700 }}>{role}</b>
                               {it.name ? `：${it.name}` : ''}
                             </>
-                          ) : it.isAiSuggested ? (
+                          ) : role === '宿泊先' ? (
+                            <>
+                              <b style={{ fontWeight: 700 }}>宿泊先：</b>
+                              {it.name ? (
+                                <a href={spotSearchUrl(it.name, area)} target="_blank" rel="noreferrer">
+                                  {it.name}
+                                </a>
+                              ) : (
+                                ''
+                              )}
+                            </>
+                          ) : it.name ? (
                             <a href={spotSearchUrl(it.name, area)} target="_blank" rel="noreferrer">
                               {it.name}
                             </a>
